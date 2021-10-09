@@ -1,0 +1,91 @@
+cmake_minimum_required(VERSION 3.21)
+
+project(FrostEngine VERSION 0.1)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+
+
+include_directories(include vendor/GLEW/include vendor/GLFW/include vendor/nlohmann vendor/nothings vendor/lunarg vendor/VulkanSDK/include)
+set(SRCS 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Images/Image.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Application/Application.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/Config.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Config/ConfigLoader.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ErrorHandling/ErrorHandler.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/GLFW/Cursor/Cursor.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/GLFW/Util/GLFWUtil.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/GLFW/Window/Window.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/GLFW/GLFWInitializer.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Images/Resolution.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/OpenGL/Buffers/OpenGLBuffer.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/OpenGL/Util/OpenGLUtil.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/OpenGL/VAOs/VAO.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/OpenGL/Renderer.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Textures/Texture.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Textures/TextureManager.cpp  
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Devices/Logical/LogicalDevice.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Devices/Physical/PhysicalDevice.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Devices/Queues/QueueFamily.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Extensions/Extension.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Layers/Layer.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/Instance/Instance.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/VulkanObject.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Objects/VulkanObjectManager.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Rendering/Vulkan/Util/VkVersionChecker/VkVersionChecker.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/API/APIUtil.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/BitMasks/BitMaskUtil.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/Files/File.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/Files/FileUtil.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/Time/Time.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/Timer/Timer.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Util/Versioning/Version.cpp 
+)
+
+add_compile_definitions(GLEW_STATIC)
+
+find_package(OpenGL)
+find_package(GLUT)
+find_package(Vulkan)
+if(WIN32)
+    set(LIBRARY_EXTENSION .lib)
+elseif(UNIX)
+    set(LIBRARY_EXTENSION .a)
+elseif(APPLE)
+    set(LIBRARY_EXTENSION .a)
+endif()
+
+add_executable(FrostEngine main.cpp ${SRCS})
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    target_link_libraries(FrostEngine ${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLEW/lib/glew32s${LIBRARY_EXTENSION} ${CMAKE_CURRENT_SOURCE_DIR}/vendor/GLFW/lib/glfw3${LIBRARY_EXTENSION})
+endif()
+if(OPENGL_FOUND)
+    include_directories(${OPENGL_INCLUDE_DIR})
+    target_link_libraries(FrostEngine OpenGL::GL)
+    set(OPENGL_SUPPORT true)
+else()
+    set(OPENGL_SUPPORT false)
+endif(OPENGL_FOUND)
+if(WIN32)
+    add_compile_definitions(_WIN32)
+endif()
+
+if(VULKAN_FOUND)
+    include_directories(${VULKAN_INCLUDE_DIR})
+    target_link_libraries(FrostEngine Vulkan::Vulkan)
+    set(VULKAN_SUPPORT true)
+else()
+    set(VULKAN_SUPPORT false)
+endif(VULKAN_FOUND)
+if(MSVC)
+    add_compile_options(/O2)
+else()
+    add_compile_options(-Wvolatile -O2)
+endif()
+
+set(FLOATING_POINT_PRECISION 2)
+
+configure_file(FrostEngineConfig.hpp.in include/FrostEngineConfig.hpp)
+
+target_include_directories(FrostEngine PUBLIC "${PROJECT_BINARY_DIR}")

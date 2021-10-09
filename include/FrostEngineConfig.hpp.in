@@ -1,0 +1,11 @@
+constexpr unsigned int FrostEngineMajorVersion = @FrostEngine_VERSION_MAJOR@;
+constexpr unsigned int FrostEngineMinorVersion = @FrostEngine_VERSION_MINOR@;
+constexpr bool OpenGLSupport = @OPENGL_SUPPORT@;
+constexpr bool VulkanSupport = @VULKAN_SUPPORT@;
+constexpr bool GLEWSupport = @GLEW_SUPPORT@;
+#define FLOATING_POINT_PRECISION @FLOATING_POINT_PRECISION@
+#if FLOATING_POINT_PRECISION == 2
+    using Float = double;
+#else
+    using Float = float;
+#endif
